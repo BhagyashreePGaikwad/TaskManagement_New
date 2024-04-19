@@ -78,32 +78,32 @@ namespace TaskManagement_April_.Service.Implementation
             }
 
         }
-        public async Task<IQueryable> SearchSubtask(string subTask,int projId, string sortBy, int pageNumber ,int pageSize)
+        public async Task<IQueryable> SearchSubtask(SearchSubTask model)
         {
            try
             {
                 var query = _dbcontext.SubTask.AsQueryable();
-                if (!subTask.IsNullOrEmpty())
+                if (!model.subTask.IsNullOrEmpty())
                 {
-                    query = query.Where(p => p.SubTaskName.Contains(subTask));
+                    query = query.Where(p => p.SubTaskName.Contains(model.subTask));
                 }
 
-                if (projId!= 0)
+                if (model.projId!= 0 && model.projId!=null)
                 {
-                    query = query.Where(p => p.projectId ==projId);
+                    query = query.Where(p => p.projectId ==model.projId);
                 }
 
 
-                if (!string.IsNullOrEmpty(sortBy))
+                if (!string.IsNullOrEmpty(model.sortBy))
                 {
-                    query = ApplySorting(query,sortBy);
+                    query = ApplySorting(query,model.sortBy);
                 }
                 else
                 {
                     query = query.OrderBy(p => p.Id);
                 }
 
-                var paginatedProjects = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+                var paginatedProjects = await query.Skip((model.pageNumber - 1) * model.pageSize).Take(model.pageSize).ToListAsync();
 
                 return paginatedProjects.AsQueryable();
             }

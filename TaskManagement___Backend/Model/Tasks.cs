@@ -40,5 +40,25 @@ namespace TaskManagement_April_.Model
         public int? subTaskId { get; set; }
         public int? ProjectId { get; set; }
 
+        public string? sortBy { get; set; }
+        public int pageNumber { get; set; } = 5;
+        public int pageSize { get; set; } = 1;
+
+    }
+
+    public class SearchSortTask
+    {
+        public int id { get; set; }
+        public bool? prior { get; set; }
+        public bool? endDate { get; set; }
+        public DateTime? duedate { get; set; }
+        public int? priority { get; set; }
+    }
+    public class SearchSortTask1
+    {
+        public bool? prior { get; set; }
+        public bool? endDate { get; set; }
+        public DateTime? duedate { get; set; }
+        public int? priority { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace TaskManagement_April_.Service
         public Task<IQueryable> GetSubTaskbyId(int id);
         public Task<bool> SaveSubTask(SubTask model);
         public Task<bool> UpdateSubTask(SubTask model,int id);
-        public Task<IQueryable> SearchSubtask(string subTask, int projId, string sortBy, int pageNumber, int pageSize);
+        public Task<IQueryable> SearchSubtask(SearchSubTask model);
         public Task<bool> DelSubTask(int id);
     }
 }

@@ -135,7 +135,7 @@ namespace TaskManagement_April_.Service.Implementation
                     query = query.Where(p => p.ProjectName.Contains(model.ProjectName));
                 }
                
-                if (model.ReportingManger!=0)
+                if (model.ReportingManger != 0 && model.ReportingManger != null)
                 {
                     query = query.Where(p => p.ReportingManger == model.ReportingManger);
                 }

@@ -169,12 +169,12 @@ namespace TaskManagement_April_.Controllers
             }
         }
 
-        [HttpGet("GetYourTaskByFilter")]
-        public async Task<IActionResult> TaskByFilter(int assignTo,string filter)
+        [HttpPost("GetYourTaskByFilter")]
+        public async Task<IActionResult> YourTaskByFilter(SearchSortTask model)
         {
             try
             {
-                var result = await _taskService.GetYourTaskSortByDueDateorPriority(assignTo,filter);
+                var result = await _taskService.GetYourTaskSortByDueDateorPriority(model);
                 return Ok(result);
 
             }
@@ -183,12 +183,42 @@ namespace TaskManagement_April_.Controllers
                 return BadRequest();
             }
         }
-        [HttpGet("SearchTask")]
-        public async Task<IActionResult> SearchTask(SearchTasks model, string sortBy, int pageNumber, int pageSize)
+
+        [HttpPost("GetYourAssignedTaskByFilter")]
+        public async Task<IActionResult> AssignedTaskByFilter(SearchSortTask model)
         {
             try
             {
-                var result = await _taskService.SearchTask(model,sortBy,pageNumber,pageSize);
+                var result = await _taskService.GetYourTaskAssignedSortByDueDateorPriority(model);
+                return Ok(result);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpPost("GetTaskByFilter")]
+        public async Task<IActionResult> TaskByFilter(SearchSortTask1 model)
+        {
+            try
+            {
+                var result = await _taskService.GetTaskSortByDueDateorPriority(model);
+                return Ok(result);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPost("SearchTask")]
+        public async Task<IActionResult> SearchTask(SearchTasks model)
+        {
+            try
+            {
+                var result = await _taskService.SearchTask(model);
                 return Ok(result);
 
             }

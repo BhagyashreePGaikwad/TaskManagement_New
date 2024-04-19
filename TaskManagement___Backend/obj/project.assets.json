@@ -4249,11 +4249,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Bhagyashree Work\\Onboarding\\C#\\TaskManagement(April)\\TaskManagement(April).csproj",
+      "projectUniqueName": "C:\\Bhagyashree Work\\TaskManagement___New\\TaskManagement_New\\TaskManagement___Backend\\TaskManagement(April).csproj",
       "projectName": "TaskManagement(April)",
-      "projectPath": "C:\\Bhagyashree Work\\Onboarding\\C#\\TaskManagement(April)\\TaskManagement(April).csproj",
+      "projectPath": "C:\\Bhagyashree Work\\TaskManagement___New\\TaskManagement_New\\TaskManagement___Backend\\TaskManagement(April).csproj",
       "packagesPath": "C:\\Users\\BhagyashreeG\\.nuget\\packages\\",
-      "outputPath": "C:\\Bhagyashree Work\\Onboarding\\C#\\TaskManagement(April)\\obj\\",
+      "outputPath": "C:\\Bhagyashree Work\\TaskManagement___New\\TaskManagement_New\\TaskManagement___Backend\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\BhagyashreeG\\AppData\\Roaming\\NuGet\\NuGet.Config",

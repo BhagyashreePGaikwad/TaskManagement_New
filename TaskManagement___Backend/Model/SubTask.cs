@@ -9,4 +9,14 @@ namespace TaskManagement_April_.Model
         [ForeignKey("Project")]
         public int projectId { get; set;}
     }
+
+    public class SearchSubTask
+    {
+        public string? subTask { get; set; }
+        public int? projId { get; set; }
+        public string? sortBy { get; set; }
+        public int pageNumber { get; set; } = 1;
+        public int pageSize { get; set; } = 5;
+    }
+
 }

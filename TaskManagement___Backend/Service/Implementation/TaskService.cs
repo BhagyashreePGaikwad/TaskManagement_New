@@ -5,6 +5,7 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using TaskManagement_April_.Context;
 using TaskManagement_April_.Model;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TaskManagement_April_.Service.Implementation
 {
@@ -122,14 +123,12 @@ namespace TaskManagement_April_.Service.Implementation
             }
         }
 
-        public async Task<IQueryable> GetYourTaskSortByDueDateorPriority(int assignTo,string? filter)
+        public async Task<IQueryable> GetYourTaskSortByDueDateorPriority(SearchSortTask model)
         {
             try
-            {
-
-                
+            {    
                 var task = await (from i in _dbcontext.Task
-                                  where i.AssignTo == assignTo
+                                  where i.AssignTo == model.id
                                   select new
                                   {
                                       id = i.Id,
@@ -144,15 +143,111 @@ namespace TaskManagement_April_.Service.Implementation
                                       SubTask = i.subTaskId
                                   }).ToListAsync();
 
-                if (filter == "priority")
+                if (model.duedate != default(DateTime) && model.duedate != null)
                 {
-                    task = task.OrderBy(t => t.Priority).ToList();
+                    task = task.Where(t => t.Duedate.Date == model.duedate.Value.Date).ToList();
                 }
-                else if (filter == "endDate")
+                if (model.priority!= null && model.priority !=0)
+                {
+                    task = task.Where(t => t.Priority ==model.priority).ToList();
+                }
+                if (model.prior!=null && model.prior !=false)
+                {
+                    task = task.OrderBy(t => t.Priority).ToList();                    
+                }
+                if (model.endDate != null && model.endDate != false)
                 {
                     task = task.OrderBy(t => t.Duedate).ToList();
                 }
 
+                return task.AsQueryable();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IQueryable> GetYourTaskAssignedSortByDueDateorPriority(SearchSortTask model)
+        {
+            try
+            {
+                var task = await (from i in _dbcontext.Task
+                                  where i.AssignBy == model.id
+                                  select new
+                                  {
+                                      id = i.Id,
+                                      Name = i.Name,
+                                      Description = i.Description,
+                                      AssignTo = i.AssignTo,
+                                      AssignBy = i.AssignBy,
+                                      Status = i.Status,
+                                      Priority = i.priority,
+                                      ProjectId = i.ProjectId,
+                                      Duedate = i.EndDate,
+                                      SubTask = i.subTaskId
+                                  }).ToListAsync();
+
+                if (model.duedate != default(DateTime) && model.duedate != null)
+                {
+                    task = task.Where(t => t.Duedate.Date == model.duedate.Value.Date).ToList();
+                }
+                if (model.priority != null && model.priority != 0)
+                {
+                    task = task.Where(t => t.Priority == model.priority).ToList();
+                }
+                if (model.prior != null && model.prior != false)
+                {
+                    task = task.OrderBy(t => t.Priority).ToList();
+                }
+                if (model.endDate != null && model.endDate != false)
+                {
+                    task = task.OrderBy(t => t.Duedate).ToList();
+                }
+
+                return task.AsQueryable();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IQueryable> GetTaskSortByDueDateorPriority(SearchSortTask1 model)
+        {
+            try
+            {
+                var task = await (from i in _dbcontext.Task
+                                  select new
+                                  {
+                                      id = i.Id,
+                                      Name = i.Name,
+                                      Description = i.Description,
+                                      AssignTo = i.AssignTo,
+                                      AssignBy = i.AssignBy,
+                                      Status = i.Status,
+                                      Priority = i.priority,
+                                      ProjectId = i.ProjectId,
+                                      Duedate = i.EndDate,
+                                      SubTask = i.subTaskId
+                                  }).ToListAsync();
+
+                if (model.duedate != default(DateTime) && model.duedate != null)
+                {
+                    task = task.Where(t => t.Duedate.Date == model.duedate.Value.Date).ToList();
+                }
+                if (model.priority != null && model.priority != 0)
+                {
+                    task = task.Where(t => t.Priority == model.priority).ToList();
+                }
+                if (model.prior != null && model.prior != false)
+                {
+                    task = task.OrderBy(t => t.Priority).ToList();
+                }
+                if (model.endDate != null && model.endDate != false)
+                {
+                    task = task.OrderBy(t => t.Duedate).ToList();
+                }
                 return task.AsQueryable();
             }
             catch (Exception ex)
@@ -352,7 +447,7 @@ namespace TaskManagement_April_.Service.Implementation
             }
         }
 
-        public async Task<IQueryable<Tasks>> SearchTask(SearchTasks model,string sortBy,int pageNumber,int pageSize)
+        public async Task<IQueryable<Tasks>> SearchTask(SearchTasks model)
         {
             try
             {
@@ -362,40 +457,40 @@ namespace TaskManagement_April_.Service.Implementation
                     query = query.Where(p => p.Name.Contains(model.Name));
                 }
 
-                if (model.ProjectId != 0)
+                if (model.ProjectId != 0 && model.ProjectId!=null)
                 {
                     query = query.Where(p => p.ProjectId == model.ProjectId);
                 }
-                if (model.subTaskId != 0)
+                if (model.subTaskId != 0 && model.subTaskId!=null)
                 {
                     query = query.Where(p => p.subTaskId == model.subTaskId);
                 }
-                if (model.priority != 0)
+                if (model.priority != 0 && model.priority!=null)
                 {
                     query = query.Where(p => p.priority == model.priority);
                 }
-                if (model.Status != 0)
+                if (model.Status != 0 && model.Status != null)
                 {
                     query = query.Where(p => p.Status == model.Status);
                 }
-                if (model.AssignBy != 0)
+                if (model.AssignBy != 0 && model.AssignBy!=null)
                 {
                     query = query.Where(p => p.AssignBy == model.AssignBy);
                 }
-                if (model.AssignTo != 0)
+                if (model.AssignTo != 0 && model.AssignTo != null)
                 {
                     query = query.Where(p => p.AssignTo == model.AssignTo);
                 }
-                if (!string.IsNullOrEmpty(sortBy))
+                if (!string.IsNullOrEmpty(model.sortBy))
                 {
-                    query = ApplySorting(query,sortBy);
+                    query = ApplySorting(query,model.sortBy);
                 }
                 else
                 {
                     query = query.OrderBy(p => p.Id);
                 }
 
-                var paginatedProjects = await query.Skip((pageNumber - 1) *pageSize).Take(pageSize).ToListAsync();
+                var paginatedProjects = await query.Skip((model.pageNumber - 1) *model.pageSize).Take(model.pageSize).ToListAsync();
 
                 return paginatedProjects.AsQueryable();
             }

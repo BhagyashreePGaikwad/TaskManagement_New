@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "XU+KU19TtxKmGJMYjwvmMOfgG37Y7/ec/TDGRrYqkm34w5EwXPn1E6PRn4qrFiZe08rUgD07h9vpgv+eGDVHnw==",
+  "dgSpecHash": "iQYFyKrgnaH7xyFu35QCUD24+7AARBLGYtSSIhBW45geIecOWAPaq7EOdFtpdpWzi6paEcTETfEfAWEr/VH51g==",
   "success": true,
-  "projectFilePath": "C:\\Bhagyashree Work\\Onboarding\\C#\\TaskManagement(April)\\TaskManagement(April).csproj",
+  "projectFilePath": "C:\\Bhagyashree Work\\TaskManagement___New\\TaskManagement_New\\TaskManagement___Backend\\TaskManagement(April).csproj",
   "expectedPackageFiles": [
     "C:\\Users\\BhagyashreeG\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\BhagyashreeG\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",

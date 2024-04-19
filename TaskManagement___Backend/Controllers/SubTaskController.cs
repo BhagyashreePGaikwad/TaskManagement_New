@@ -141,12 +141,12 @@ namespace TaskManagement_April_.Controllers
             }
         }
 
-        [HttpGet("SearchSubtask")]
-        public async Task<IActionResult> SearchSubtask(string subTask, int projId, string sortBy, int pageNumber, int pageSize)
+        [HttpPost("SearchSubtask")]
+        public async Task<IActionResult> SearchSubtask(SearchSubTask model)
         {
             try
             {
-                var result = await _subTaskService.SearchSubtask(subTask,projId,sortBy,pageNumber,pageSize);
+                var result = await _subTaskService.SearchSubtask(model);
                 return Ok(result);
 
             }
