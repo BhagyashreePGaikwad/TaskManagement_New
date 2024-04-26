@@ -273,3 +273,6 @@ C:\Bhagyashree Work\TaskManagement___New\TaskManagement_New\TaskManagement___Bac
 C:\Bhagyashree Work\TaskManagement___New\TaskManagement_New\TaskManagement___Backend\obj\Debug\net8.0\TaskManagement(April).pdb
 C:\Bhagyashree Work\TaskManagement___New\TaskManagement_New\TaskManagement___Backend\obj\Debug\net8.0\TaskManagement(April).genruntimeconfig.cache
 C:\Bhagyashree Work\TaskManagement___New\TaskManagement_New\TaskManagement___Backend\obj\Debug\net8.0\ref\TaskManagement(April).dll
+C:\Bhagyashree Work\TaskManagement___New\TaskManagement_New\TaskManagement___Backend\bin\Debug\net8.0\Template\AssignTaskTemplate.html
+C:\Bhagyashree Work\TaskManagement___New\TaskManagement_New\TaskManagement___Backend\bin\Debug\net8.0\Template\TaskNotCompleted.html
+C:\Bhagyashree Work\TaskManagement___New\TaskManagement_New\TaskManagement___Backend\bin\Debug\net8.0\Template\UpdateTaskTemplate.html

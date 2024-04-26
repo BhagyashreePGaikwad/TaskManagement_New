@@ -5,6 +5,6 @@
     "\\Service",
     "\\Service\\Implementation"
   ],
-  "SelectedNode": "\\Controllers\\SubTaskController.cs",
+  "SelectedNode": "\\Service\\Implementation\\TaskService.cs",
   "PreviewInSolutionExplorer": false
 }

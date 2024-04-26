@@ -42,27 +42,27 @@ namespace TaskManagement_April_.Controllers
                         };
                         return Ok(obResponse);
                     }
-                       var request = await _subTaskService.SaveSubTask(model);
-                        if (request)
-                        {
+                       var (request,msg,status) = await _subTaskService.SaveSubTask(model);
+                        //if (request)
+                        //{
 
                             obResponse = new Response
                             {
-                                Message = "SubTask created successfully.",
-                                IsSuccess = true
+                                Message =msg,
+                                IsSuccess = request
                             };
-                            return Ok(obResponse);
-                        }
-                        else
-                        {
-                            obResponse = new Response
-                            {
-                                Message = "SubTask cammot be added.",
-                                IsSuccess = false
-                            };
-                            return Ok(obResponse);
-                        }
-                    
+                    return StatusCode(status, obResponse);
+                    //}
+                    //else
+                    //{
+                    //    obResponse = new Response
+                    //    {
+                    //        Message = "SubTask cammot be added.",
+                    //        IsSuccess = false
+                    //    };
+                    //    return Ok(obResponse);
+                    //}
+
 
                 }
                 return BadRequest("Some properties are not valid.");
@@ -71,7 +71,12 @@ namespace TaskManagement_April_.Controllers
             catch (Exception ex)
             {
 
-                return BadRequest("Some properties are not valid.");
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -93,26 +98,26 @@ namespace TaskManagement_April_.Controllers
                         };
                         return Ok(obResponse);
                     }
-                    var request = await _subTaskService.UpdateSubTask(model,id);
-                    if (request)
-                    {
+                    var (request, msg, status) = await _subTaskService.UpdateSubTask(model,id);
+                    //if (request)
+                    //{
 
                         obResponse = new Response
                         {
-                            Message = "SubTask updated successfully.",
-                            IsSuccess = true
+                            Message = msg,
+                            IsSuccess = request
                         };
-                        return Ok(obResponse);
-                    }
-                    else
-                    {
-                        obResponse = new Response
-                        {
-                            Message = "SubTask cannot be updted.",
-                            IsSuccess = false
-                        };
-                        return Ok(obResponse);
-                    }
+                
+                   return StatusCode(status, obResponse);     //}
+                    //else
+                    //{
+                    //    obResponse = new Response
+                    //    {
+                    //        Message = "SubTask cannot be updted.",
+                    //        IsSuccess = false
+                    //    };
+                    //    return Ok(obResponse);
+                    //}
 
                 }
                 return BadRequest("Some properties are not valid.");
@@ -120,8 +125,12 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-
-                return BadRequest("Some properties are not valid.");
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -137,7 +146,12 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -152,7 +166,12 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -167,7 +186,13 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -195,12 +220,17 @@ namespace TaskManagement_April_.Controllers
                     };
                 }
 
-                return Ok(obResponse);
+                return BadRequest(obResponse);
                 
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 

@@ -12,8 +12,8 @@ using TaskManagement_April_.Context;
 namespace TaskManagement_April_.Migrations
 {
     [DbContext(typeof(TaskManagementContext))]
-    [Migration("20240418101013_Initial3")]
-    partial class Initial3
+    [Migration("20240425063521_AddColumn")]
+    partial class AddColumn
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,9 +37,6 @@ namespace TaskManagement_April_.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CommentId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -58,8 +55,6 @@ namespace TaskManagement_April_.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CommentId");
-
                     b.HasIndex("ReplyToCommentId");
 
                     b.HasIndex("TaskId");
@@ -67,6 +62,32 @@ namespace TaskManagement_April_.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Comment");
+                });
+
+            modelBuilder.Entity("TaskManagement_April_.Model.Documents", b =>
+                {
+                    b.Property<int>("DocId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocId"));
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("userId")
+                        .HasColumnType("int");
+
+                    b.HasKey("DocId");
+
+                    b.HasIndex("userId");
+
+                    b.ToTable("Documents");
                 });
 
             modelBuilder.Entity("TaskManagement_April_.Model.Priority", b =>
@@ -94,12 +115,19 @@ namespace TaskManagement_April_.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("ProjectCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ProjectName")
                         .IsRequired()
@@ -188,6 +216,9 @@ namespace TaskManagement_April_.Migrations
                     b.Property<int>("AssignTo")
                         .HasColumnType("int");
 
+                    b.Property<string>("Attachments")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -199,7 +230,8 @@ namespace TaskManagement_April_.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProjectId")
+                    b.Property<int?>("ProjectId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
@@ -208,10 +240,14 @@ namespace TaskManagement_April_.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<string>("TaskCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("priority")
                         .HasColumnType("int");
 
-                    b.Property<int>("subTaskId")
+                    b.Property<int?>("subTaskId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -228,7 +264,7 @@ namespace TaskManagement_April_.Migrations
 
                     b.HasIndex("subTaskId");
 
-                    b.ToTable("Task");
+                    b.ToTable("Tasks");
                 });
 
             modelBuilder.Entity("TaskManagement_April_.Model.User", b =>
@@ -264,10 +300,6 @@ namespace TaskManagement_April_.Migrations
             modelBuilder.Entity("TaskManagement_April_.Model.Comment", b =>
                 {
                     b.HasOne("TaskManagement_April_.Model.Comment", null)
-                        .WithMany("Replies")
-                        .HasForeignKey("CommentId");
-
-                    b.HasOne("TaskManagement_April_.Model.Comment", null)
                         .WithMany()
                         .HasForeignKey("ReplyToCommentId");
 
@@ -280,6 +312,15 @@ namespace TaskManagement_April_.Migrations
                     b.HasOne("TaskManagement_April_.Model.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TaskManagement_April_.Model.Documents", b =>
+                {
+                    b.HasOne("TaskManagement_April_.Model.User", null)
+                        .WithMany()
+                        .HasForeignKey("userId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -337,8 +378,7 @@ namespace TaskManagement_April_.Migrations
                     b.HasOne("TaskManagement_April_.Model.SubTask", null)
                         .WithMany()
                         .HasForeignKey("subTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("TaskManagement_April_.Model.User", b =>
@@ -348,11 +388,6 @@ namespace TaskManagement_April_.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("TaskManagement_April_.Model.Comment", b =>
-                {
-                    b.Navigation("Replies");
                 });
 #pragma warning restore 612, 618
         }

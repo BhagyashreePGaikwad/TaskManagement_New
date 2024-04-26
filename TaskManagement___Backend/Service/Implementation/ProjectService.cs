@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using TaskManagement_April_.Context;
 using TaskManagement_April_.Model;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TaskManagement_April_.Service.Implementation
 {
@@ -10,30 +11,66 @@ namespace TaskManagement_April_.Service.Implementation
     {
         #region Variable
         private TaskManagementContext _dbcontext;
+        private ITaskService _taskService;
+        private ISubTaskService _subTaskService;
+        private ICounterService _counterService;
+        private readonly IConfiguration _configuration;
+      //  private readonly string counterFilePath = "C:\\Bhagyashree Work\\TaskManagement___New\\TaskManagement_New\\TaskManagement___Backend\\Counter\\ProjectCounter.txt";
         #endregion
 
         #region Constructor
-        public ProjectService(TaskManagementContext dbcontext)
+        public ProjectService(TaskManagementContext dbcontext,ISubTaskService subTaskService,ITaskService taskService,IConfiguration configuration,ICounterService counterService)
         {
             _dbcontext = dbcontext;
+            _taskService = taskService;
+            _subTaskService = subTaskService;
+            _configuration = configuration;
+            _counterService = counterService;
         }
         #endregion
-        public Task<bool> DelProject(int id)
+
+        //private int? LoadCounterFromFile()
+        //{
+        //    if (File.Exists(counterFilePath))
+        //    {
+        //        string counterString = File.ReadAllText(counterFilePath);
+        //        if (int.TryParse(counterString, out int counterValue))
+        //        {
+        //            return counterValue;
+        //        }
+        //    }
+        //    return null;
+        //}
+        
+        //private void SaveCounterToFile(int counter)
+        //{
+        //    File.WriteAllText(counterFilePath, counter.ToString());
+        //}
+        public async Task<bool> DelProject(int id)
         {
             try
             {
                 var proj=_dbcontext.Project.FirstOrDefault(x => x.Id == id);
                 if (proj != null)
                 {
-                    _dbcontext.Project.Remove(proj);
-                    _dbcontext.SaveChanges();
-                    return Task.FromResult(true);
+                    var projT = await _taskService.DelTaskwithProjId(id);
+                    var subTaskT = await _subTaskService.DelSubTaskwithProject(id);
+                    if(projT && subTaskT)
+                    {
+                        _dbcontext.Project.Remove(proj);
+                        _dbcontext.SaveChanges();
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
-                else { return Task.FromResult(false); }
+                else { return false; }
 
             }catch (Exception ex)
             {
-                return Task.FromResult(false);
+                return false;
             }
         }
 
@@ -67,17 +104,29 @@ namespace TaskManagement_April_.Service.Implementation
             return result.AsQueryable();
         }
 
-        public Task<bool> SaveProject(Project model)
+        public async Task<(bool,string,int,string)> SaveProject(ProjectF model)
         {
             try
             {
                 var proj=_dbcontext.Project.FirstOrDefault(p=>p.ProjectName == model.ProjectName);
                 if (proj != null)
                 {
-                    return Task.FromResult(false);
+                    return((false, "Project already exists", 400,""));
                 }
                 else
                 {
+                    string prefix = _configuration["ProjectCodeSettings:Prefix"];
+                    string suffix = _configuration["ProjectCodeSettings:Suffix"];
+                    int codeLength = Convert.ToInt32(_configuration["ProjectCodeSettings:Length"]);
+                    var projCounter =await _counterService.ProjectCounter();
+
+                    string generatedCode = GenerateRandomCode(prefix, suffix, codeLength, projCounter);
+
+
+                    if (!_dbcontext.User.Any(u => u.Id == model.ReportingManger))
+                    {
+                        return ((false, "Invalid UserId", 400, ""));
+                    }
                     var project = new Project()
                     {
                         Id = model.Id,
@@ -85,44 +134,56 @@ namespace TaskManagement_April_.Service.Implementation
                         Description = model.Description,
                         StartDate = model.StartDate,
                         EndDate = model.EndDate,
-                        ReportingManger=model.ReportingManger
-                       
+                        ReportingManger = model.ReportingManger,
+                        ProjectCode = generatedCode,
+                        CreatedOn = DateTime.Now,
+
                     };
                     _dbcontext.Project.Add(project);
                     _dbcontext.SaveChanges();
-                    return Task.FromResult(true);
+                    return ((true, "Project added successfully", 200, generatedCode));
                 }
-                return Task.FromResult(false);
+                return ((false, "Project cannot be added", 400, ""));
             }catch (Exception ex) {
-                throw;
+                return ((false, ex.Message, 400, ""));
             }
         }
-        public Task<bool> UpdateProject(Project model, int id)
+
+        private string GenerateRandomCode(string prefix, string suffix, int length,int counter)
+        {
+            string format = new string('0', length - prefix.Length - suffix.Length);
+            string code = counter.ToString(format);
+            return prefix + code + suffix;
+        }
+        public Task<(bool,string,int)> UpdateProject(Project model, int id)
         {
             try
             {
                 var proj = _dbcontext.Project.FirstOrDefault(p => p.Id == id);
                 if (proj == null)
                 {
-                    return Task.FromResult(false);
+                    return Task.FromResult((false, "Project does not exists",404));
                 }
                 else
                 {
 
-                   
+                    if (!_dbcontext.User.Any(u => u.Id == model.ReportingManger))
+                    {
+                        return Task.FromResult((false, "Invalid UserId", 400));
+                    }
                     proj.ProjectName = model.ProjectName;
                     proj.Description = model.Description;
                     proj.StartDate = model.StartDate;
                     proj.EndDate = model.EndDate;
                     proj.ReportingManger = model.ReportingManger;
                     _dbcontext.SaveChanges();
-                    return Task.FromResult(true);
+                    return Task.FromResult((true, "Project updated successfully", 200));
                 }
-                return Task.FromResult(false);
+                return Task.FromResult((false, "Project cannot be updated",400));
             }
             catch (Exception ex)
             {
-                throw;
+                return Task.FromResult((false, ex.Message, 400));
             }
         }
         public async Task<IQueryable<Project>> SearchProject(SearchProject model)

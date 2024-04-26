@@ -6,9 +6,11 @@ namespace TaskManagement_April_.Service
     {
         public Task<IQueryable> GetAllTaskofProject(int ProjectId);
         public Task<IQueryable> GetTaskById(int id);
-        public Task<bool> SaveTask(Tasks model);
-        public Task<bool> UpdateTask(Tasks model, int id);
+        public Task<(bool, string, int,string)> SaveTask(TaskL model);
+        public Task<(bool, string, int)> UpdateTask(TaskL model, int id);
         public Task<bool> DelTask(int id);
+        public Task<bool> DelTaskwithSubTaskId(int subTaskId);
+        public Task<bool> DelTaskwithProjId(int projId);
         public Task CheckIncompleteTasksAndSendEmail();
         public Task<IQueryable<Tasks>> SearchTask(SearchTasks model);
         public Task<IQueryable> GetAllTaskofSubTask(int subTaskId);
@@ -16,5 +18,7 @@ namespace TaskManagement_April_.Service
         public Task<IQueryable> GetYourTaskSortByDueDateorPriority(SearchSortTask model);
         public Task<IQueryable> GetYourTaskAssignedSortByDueDateorPriority(SearchSortTask model);
         public Task<IQueryable> GetTaskSortByDueDateorPriority(SearchSortTask1 model);
+        public Task<(bool, string)> UpdateTaskStatus(int id);
+        public Task<(bool, string)> UpdateTaskPriority(int id);
     }
 }

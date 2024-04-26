@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TaskManagement_April_.Context;
 using TaskManagement_April_.Model;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TaskManagement_April_.Service.Implementation
 {
@@ -63,10 +64,23 @@ namespace TaskManagement_April_.Service.Implementation
 
         }
 
-        public async Task<bool> SaveComment(Comment model)
+        public async Task<(bool,string)> SaveComment(Comment model)
         {
             try
             {
+                if (!_dbcontext.User.Any(u => u.Id == model.UserId))
+                {
+                     return (false,"Ivalid UserId");
+                }
+                if (!_dbcontext.Tasks.Any(u => u.Id == model.TaskId))
+                {
+                    return (false, "Ivalid taskId");
+                }
+                if (!model.TaggedUserIds.All(id => _dbcontext.User.Select(i => i.Id).Contains(id)))
+                {
+                    
+                     return ((false, "Invalid UserId"));
+                }
                 var comment = new Comment
                 {
                     //Id = model.Id,
@@ -94,19 +108,32 @@ namespace TaskManagement_April_.Service.Implementation
                 //    _dbcontext.Add(replyComment);
                 //}
                 //_dbcontext.SaveChangesAsync();
-                return true;
+                return (true,"Comment Added");
 
             }
             catch (Exception ex)
             {
-                return false;
+                return (false,ex.Message);
             }
         }
 
-        public Task<bool> UpdateComment(Comment model, int id)
+        public Task<(bool,string)> UpdateComment(Comment model, int id)
         {
             try
             {
+                if (!_dbcontext.User.Any(u => u.Id == model.UserId))
+                {
+                    return Task.FromResult((false, "Ivalid UserId"));
+                }
+                if (!_dbcontext.Tasks.Any(u => u.Id == model.TaskId))
+                {
+                    return Task.FromResult((false, "Ivalid taskId"));
+                }
+                if (!model.TaggedUserIds.All(userId => _dbcontext.User.Select(i => i.Id).Contains(userId)))
+                {
+                   
+                     return Task.FromResult((false, "Invalid UserId"));
+                }
                 var comment = _dbcontext.Comment.FirstOrDefault(c => c.Id == id);
                 if (comment != null)
                 {
@@ -116,14 +143,14 @@ namespace TaskManagement_April_.Service.Implementation
                     comment.TaggedUserIds = model.TaggedUserIds.Cast<int>().ToList();
                     // comment.UserId = model.UserId;
                     _dbcontext.SaveChanges();
-                    return Task.FromResult(true);
+                    return Task.FromResult((true,"Comment Updated successfully"));
                 }
-                return Task.FromResult(false);
+                return Task.FromResult((false,"Comment cannot be updated"));
 
             }
             catch (Exception ex)
             {
-                return Task.FromResult(false);
+                return Task.FromResult((false,ex.Message));
             }
 
         }

@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using TaskManagement_April_.AuthAttribute;
 using TaskManagement_April_.Model;
 using TaskManagement_April_.Service;
 using TaskManagement_April_.Service.Implementation;
@@ -33,7 +34,7 @@ namespace TaskManagement_April_.Controllers
 
         #region Methods
         [HttpGet("GetUsers")]
-        [Authorize(Roles = "Admin, Manager")]
+        [CustomAuthorize("Admin", "Manager")]
         public async Task<IActionResult> GetUsers()
         {
             try
@@ -43,12 +44,18 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
         [HttpGet("GetUserById")]
-        [Authorize(Roles = "Admin, Manager")]
+        [CustomAuthorize("Admin", "Manager")]
+       // [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> GetUserById(int id)
         {
             try
@@ -62,7 +69,13 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -82,9 +95,12 @@ namespace TaskManagement_April_.Controllers
                         
                         var claims = new List<Claim>
                         {
-                            new Claim(ClaimTypes.NameIdentifier,value.ToString()),
+
                             new Claim(ClaimTypes.Name, value.Name),
-                        };
+                            new Claim(ClaimTypes.NameIdentifier, value.Id.ToString()),
+                            new Claim(ClaimTypes.NameIdentifier,value.ToString())
+
+                    };
 
                         var roleName = await _roleService.GetRoleNameById(value.RoleId);
                         if (!string.IsNullOrEmpty(roleName))
@@ -98,12 +114,12 @@ namespace TaskManagement_April_.Controllers
                         var Sectoken = new JwtSecurityToken(_config["Jwt:Issuer"],
                           _config["Jwt:Issuer"],
                           claims,
-                          expires: DateTime.Now.AddMinutes(120),
+                          expires: DateTime.Now.AddDays(1),
                           signingCredentials: credentials);
-
+                        var userId=claims.FirstOrDefault(s=>s.Type==ClaimTypes.NameIdentifier)?.Value;
                         var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
-
-                        return Ok(token);
+                        
+                        return Ok(new { Token = token, UserId = userId });
                     }
                     else if(result && value==null)
                     {
@@ -121,7 +137,7 @@ namespace TaskManagement_April_.Controllers
                             IsSuccess = false
                         };
                     }
-                    return Ok(obResponse);
+                    return BadRequest(obResponse);
                 }
                 else if (model.Email.IsNullOrEmpty())
                 {
@@ -147,12 +163,19 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
         [HttpPost("SaveUser")]
-        [Authorize(Roles = "Admin")]
+        // [Authorize(Roles = "Admin")]
+        [CustomAuthorize("Admin")]
+       // [CustomAdminAuthorize]
         public async Task<IActionResult> SaveUser([FromBody] User user)
         {
             try
@@ -181,82 +204,71 @@ namespace TaskManagement_April_.Controllers
                     {
                         obResponse = new Response
                         {
-                            Message = "User Name  is required.",
+                            Message = "Password is required.",
                             IsSuccess = false
                         };
                         return Ok(obResponse);
                     }
-                    var result= await _userService.SaveUser(user);
-                    if (result)
-                    {
+                    var (result,message,status)= await _userService.SaveUser(user);
+
                             obResponse = new Response
                             {
-                                Message = "User created successfully.",
-                                IsSuccess = true
+                                Message =message,
+                                IsSuccess = result
                             };
-                        return Ok(obResponse);
-                    }
-                    else
-                    {
-                        obResponse = new Response
-                        {
-                            Message = "User cannot be created.",
-                            IsSuccess = false
-                        };
-                        return Ok(obResponse);
-
-                    }
+                     return StatusCode(status,obResponse);
+                    
                 }
                 return BadRequest("Some properties are not valid.");
 
             }
             catch (Exception ex)
             {
-                return BadRequest("Some properties are not valid.");
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
         [HttpPost("UpdateUser/{id}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
+        [CustomAuthorize("Admin")]
         public async Task<IActionResult> UpdateUser([FromBody] User user,int id)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    var result = await _userService.UpdateUser(user,id);
-                    if (result)
-                    {
+                    var (result,msg,status) = await _userService.UpdateUser(user,id);
                         
                         obResponse = new Response
                         {
-                            Message = "User updated successfully.",
-                            IsSuccess = true
+                            Message = msg,
+                            IsSuccess = result
                         };
-                        return Ok(obResponse);
-                    }
-                    else
-                    {
-                        obResponse = new Response
-                        {
-                            Message = "User cannot be updated.",
-                            IsSuccess = false
-                        };
-                        return Ok(obResponse);
-
-                    }
+                    return StatusCode(status, obResponse);
                 }
                 return BadRequest("Some properties are not valid.");
 
             }
             catch (Exception ex)
             {
-                return BadRequest("Some properties are not valid.");
+
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
         [HttpDelete("DeleteUser")]
-        [Authorize(Roles = "Admin")]
+        // [Authorize(Roles = "Admin")]
+        [CustomAuthorize("Admin")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             try
@@ -267,7 +279,12 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
         #endregion

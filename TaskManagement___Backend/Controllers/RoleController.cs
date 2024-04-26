@@ -32,7 +32,12 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("Some properties are not valid.");
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
            
         }
@@ -47,7 +52,12 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("Some properties are not valid.");
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
         #endregion

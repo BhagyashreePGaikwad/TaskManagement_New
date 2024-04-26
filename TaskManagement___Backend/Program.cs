@@ -10,14 +10,6 @@ using TaskManagement_April_.Service;
 using TaskManagement_April_.Service.Implementation;
 
 var builder = WebApplication.CreateBuilder(args);
-
-string smtpServer = "smtp.gmail.com";
-int port = 587; 
-string username = "bhagyashree.gaikwad@wonderbiz.in";
-string password = "tpli pogm axqq egvk";
-
-
-
 //Jwt token
 
 var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
@@ -36,6 +28,37 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
          ValidAudience = jwtIssuer,
          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
      };
+     options.Events = new JwtBearerEvents
+     {
+         OnAuthenticationFailed = context =>
+         {
+             if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+             {
+                 context.Response.Headers.Add("Token-Expired", "true");
+                 context.Response.Headers.Add("Access-Control-Expose-Headers", "Token-Expired");
+                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                 context.Response.ContentType = "application/json";
+                 var message = Encoding.UTF8.GetBytes("{\"message\": \"Unauthorized: Token has expired.\", \"isSuccess\": false}");
+                 return context.Response.Body.WriteAsync(message, 0, message.Length);
+             }
+             else if (context.Exception.GetType() == typeof(SecurityTokenInvalidSignatureException))
+             {
+                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                 context.Response.ContentType = "application/json";
+                 var message = Encoding.UTF8.GetBytes("{\"message\": \"Unauthorized: Invalid token.\", \"isSuccess\": false}");
+                 return context.Response.Body.WriteAsync(message, 0, message.Length);
+             }
+             else
+             {
+                 // Handle other authentication failures
+                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                 context.Response.ContentType = "application/json";
+                 var message = Encoding.UTF8.GetBytes("{\"message\": \"Unauthorized: Authentication failed.\", \"isSuccess\": false}");
+                 return context.Response.Body.WriteAsync(message, 0, message.Length);
+             }
+         }
+     };
+
  });
 //Jwt token 
 
@@ -61,7 +84,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IDocumentService, DocumentService>();
+builder.Services.AddScoped<ICounterService, CounterService>();
 builder.Services.AddHostedService<TaskReminderService>();
+
 //builder.Services.AddScoped<IEmailService>(s =>
 //    new EmailService("smtp.gmail.com", 587,"bhagyashree.gaikwad@wonderbiz.in","tpli pogm axqq egvk"));
 #endregion
@@ -84,7 +110,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

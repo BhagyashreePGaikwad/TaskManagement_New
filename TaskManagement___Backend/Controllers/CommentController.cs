@@ -29,35 +29,47 @@ namespace TaskManagement_April_.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var value = await _commentService.SaveComment(comment);
+                    var (value,msg) = await _commentService.SaveComment(comment);
+                    //if (value)
+                    //{
+
+                    obResponse = new Response
+                    {
+                        Message = msg,
+                        IsSuccess = value
+                    };
+
                     if (value)
                     {
-
-                        obResponse = new Response
-                        {
-                            Message = "Comment added successfully",
-                            IsSuccess = true
-                        };
-
-
                         return Ok(obResponse);
                     }
                     else
                     {
-                        obResponse = new Response
-                        {
-                            Message = "Comment cannot be added",
-                            IsSuccess = false
-                        };
-                        return Ok(obResponse);
+                        return BadRequest(obResponse);
                     }
+                    //}
+                    //else
+                    //{
+                    //    obResponse = new Response
+                    //    {
+                    //        Message = "Comment cannot be added",
+                    //        IsSuccess = false
+                    //    };
+                    //    return Ok(obResponse);
+                    //}
 
                 }
                 return Ok(obResponse);
             }
             catch (Exception ex)
             {
-                throw;
+
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -74,7 +86,13 @@ namespace TaskManagement_April_.Controllers
                 return BadRequest();
             }catch (Exception ex)
             {
-                throw;
+
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return Ok(obResponse);
             }
 
         }
@@ -87,34 +105,48 @@ namespace TaskManagement_April_.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var result = await _commentService.UpdateComment(comment, id);
+                    var (result,msg) = await _commentService.UpdateComment(comment, id);
+                    //if (result)
+                    //{
+
+                    obResponse = new Response
+                    {
+                        Message = msg,
+                        IsSuccess = result
+                    };
+                       // return Ok(obResponse);
                     if (result)
                     {
-
-                        obResponse = new Response
-                        {
-                            Message = "Comment updated successfully.",
-                            IsSuccess = true
-                        };
                         return Ok(obResponse);
                     }
                     else
                     {
-                        obResponse = new Response
-                        {
-                            Message = "Comment cannot be updated.",
-                            IsSuccess = false
-                        };
-                        return Ok(obResponse);
-
+                        return BadRequest(obResponse);
                     }
+                    //}
+                    //else
+                    //{
+                    //    obResponse = new Response
+                    //    {
+                    //        Message = "Comment cannot be updated.",
+                    //        IsSuccess = false
+                    //    };
+                    //    return Ok(obResponse);
+
+                    // }
                 }
                 return BadRequest("Some properties are not valid.");
 
             }
             catch (Exception ex)
             {
-                return BadRequest("Some properties are not valid.");
+
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -141,14 +173,20 @@ namespace TaskManagement_April_.Controllers
                         Message = "Comment cannot be delete.",
                         IsSuccess = false
                     };
-                    return Ok(obResponse);
+                    return BadRequest(obResponse);
 
                 }
 
             }
             catch (Exception ex)
             {
-                return BadRequest();
+
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
         #endregion

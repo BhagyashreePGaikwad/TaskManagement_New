@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using TaskManagement_April_.Context;
 using TaskManagement_April_.Model;
@@ -72,44 +73,82 @@ namespace TaskManagement_April_.Service.Implementation
             }
         }
 
-        public Task<bool> SaveUser(User model)
+        public Task<(bool,string,int)> SaveUser(User model)
         {
             try
             {
-                var user=_dbcontext.User.FirstOrDefault(s=> s.Email==model.Email);
-                if(user==null)
+                var user = _dbcontext.User.FirstOrDefault(s => s.Email == model.Email);
+                if (user == null)
                 {
                     _dbcontext.Add(model);
                     _dbcontext.SaveChanges();
-                    return Task.FromResult(true);
+                    return Task.FromResult((true, "User created successfully",200));
                 }
-                return Task.FromResult(false);
+                else
+                {
+                    return Task.FromResult((false, "Email Id already in use",400));
+                }
+            }
+            catch (DbUpdateException ex)
+            {
+                var innerException = ex.InnerException;
+                if (innerException is SqlException sqlException && sqlException.Number == 547)
+                {
+                    return Task.FromResult((false, "Invalid RoleId", 400));
+                }
+                else
+                {
+                    return Task.FromResult((false, "Database error", 400));
+                }
             }
             catch (Exception ex)
             {
-                throw;
+                return Task.FromResult((false, ex.Message,400));
             }
         }
 
-        public Task<bool> UpdateUser(User model,int id)
+
+        public Task<(bool,string,int)> UpdateUser(User model,int id)
         {
             try
             {
-                var user = _dbcontext.User.FirstOrDefault(s => s.Id==id);
-                if (user != null)
+                var user = _dbcontext.User.FirstOrDefault(s => s.Id == id);
+                var Existemail=_dbcontext.User.FirstOrDefault(s=>s.Email == model.Email && s.Id!=id);
+                if (user != null && Existemail==null)
                 {
                    user.Name= model.Name;
                     user.Email=model.Email;
                     user.Password=model.Password;
                     user.RoleId=model.RoleId;
                     _dbcontext.SaveChanges();
-                    return Task.FromResult(true);
+                    return Task.FromResult((true,"User updated successfully",200));
                 }
-                return Task.FromResult(false);
+                else if (Existemail != null)
+                {
+                    return Task.FromResult((false, "Email Id already exist", 400));
+                }
+                else
+                {
+                    return Task.FromResult((false, "User does not exist",404));
+                }
+                return Task.FromResult((false, "Email Id already exist", 400));
+            }
+            catch (DbUpdateException ex)
+            {
+                var innerException = ex.InnerException;
+                if (innerException is SqlException sqlException && sqlException.Number == 547)
+                {
+                    return Task.FromResult((false, "Invalid RoleId",547));
+                }
+                else
+                {
+                    return Task.FromResult((false, "Database error", 400));
+                }
             }
             catch (Exception ex)
             {
-                throw;
+
+                return Task.FromResult((false, ex.Message, 400));
             }
         }
 

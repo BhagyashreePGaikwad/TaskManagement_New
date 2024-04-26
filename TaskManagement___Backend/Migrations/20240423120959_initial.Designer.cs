@@ -12,8 +12,8 @@ using TaskManagement_April_.Context;
 namespace TaskManagement_April_.Migrations
 {
     [DbContext(typeof(TaskManagementContext))]
-    [Migration("20240418104228_Initial4")]
-    partial class Initial4
+    [Migration("20240423120959_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,6 +62,32 @@ namespace TaskManagement_April_.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Comment");
+                });
+
+            modelBuilder.Entity("TaskManagement_April_.Model.Documents", b =>
+                {
+                    b.Property<int>("DocId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocId"));
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("userId")
+                        .HasColumnType("int");
+
+                    b.HasKey("DocId");
+
+                    b.HasIndex("userId");
+
+                    b.ToTable("Documents");
                 });
 
             modelBuilder.Entity("TaskManagement_April_.Model.Priority", b =>
@@ -183,6 +209,10 @@ namespace TaskManagement_April_.Migrations
                     b.Property<int>("AssignTo")
                         .HasColumnType("int");
 
+                    b.Property<string>("Attachments")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -194,7 +224,8 @@ namespace TaskManagement_April_.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProjectId")
+                    b.Property<int?>("ProjectId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
@@ -206,7 +237,7 @@ namespace TaskManagement_April_.Migrations
                     b.Property<int>("priority")
                         .HasColumnType("int");
 
-                    b.Property<int>("subTaskId")
+                    b.Property<int?>("subTaskId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -275,6 +306,15 @@ namespace TaskManagement_April_.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TaskManagement_April_.Model.Documents", b =>
+                {
+                    b.HasOne("TaskManagement_April_.Model.User", null)
+                        .WithMany()
+                        .HasForeignKey("userId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TaskManagement_April_.Model.Project", b =>
                 {
                     b.HasOne("TaskManagement_April_.Model.User", null)
@@ -328,8 +368,7 @@ namespace TaskManagement_April_.Migrations
                     b.HasOne("TaskManagement_April_.Model.SubTask", null)
                         .WithMany()
                         .HasForeignKey("subTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("TaskManagement_April_.Model.User", b =>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using TaskManagement_April_.Model;
 using TaskManagement_April_.Service;
 
@@ -25,10 +26,11 @@ namespace TaskManagement_April_.Controllers
         #region Methods
         [HttpPost("SaveProject")]
         [Authorize(Roles = "Admin,Manager")]
-        public async Task<IActionResult> SaveProject([FromBody] Project model)
+        public async Task<IActionResult> SaveProject([FromBody] ProjectF model)
         {
             try
             {
+              //  var userId = claims.FirstOrDefault(s => s.Type == ClaimTypes.NameIdentifier)?.Value;
                 if (ModelState.IsValid)
                 {
                     if(model.ProjectName.IsNullOrEmpty())
@@ -49,38 +51,31 @@ namespace TaskManagement_April_.Controllers
                         };
                         return Ok(obResponse);
                     }
-                    
-                        var request = await _projectService.SaveProject(model);
-                        if (request)
-                        {
+                    var (request, msg, status, generatedcode) = await _projectService.SaveProject(model);
+                       
 
                             obResponse = new Response
                             {
-                                Message = "Project created successfully.",
-                                IsSuccess = true
+                                Message = msg,
+                                IsSuccess = request
                             };
 
+                    return StatusCode(status, new { response = obResponse, code = generatedcode });
 
-                            return Ok(obResponse);
-                        }
-                        else
-                        {
-                            obResponse = new Response
-                            {
-                                Message = "Project cannot be created",
-                                IsSuccess = false
-                            };
-                            return Ok(obResponse);
-                        }
-                    
+
                 }
                 return BadRequest("Some properties are not valid.");
 
             }
             catch (Exception ex)
             {
-                
-                return BadRequest("Some properties are not valid.");
+
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
         [HttpPost("UpdateProject/{id}")]
@@ -109,38 +104,28 @@ namespace TaskManagement_April_.Controllers
                         };
                         return Ok(obResponse);
                     }
-                       var request = await _projectService.UpdateProject(model, id);
-                        if (request)
-                        {
+                       var (request,msg,status) = await _projectService.UpdateProject(model, id);
 
                             obResponse = new Response
                             {
-                                Message = "Project updated successfully.",
-                                IsSuccess = true
+                                Message =msg,
+                                IsSuccess = request
                             };
 
 
-                            return Ok(obResponse);
-                        }
-                        else
-                        {
-                            obResponse = new Response
-                            {
-                                Message = "Project cannot be updated",
-                                IsSuccess = false
-                            };
-                            return Ok(obResponse);
-                        }
-
-                   
+                    return StatusCode(status, obResponse);
                 }
                 return BadRequest("Some properties are not valid.");
 
             }
             catch (Exception ex)
             {
-
-                return BadRequest("Some properties are not valid.");
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -155,7 +140,13 @@ namespace TaskManagement_April_.Controllers
 
             }
             catch (Exception ex) {
-                return BadRequest();
+
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
 
             }
         }
@@ -171,7 +162,12 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -187,7 +183,12 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -203,7 +204,12 @@ namespace TaskManagement_April_.Controllers
                 }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 

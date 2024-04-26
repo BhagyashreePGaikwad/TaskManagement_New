@@ -7,6 +7,7 @@ namespace TaskManagement_April_.Model
     {
         [Key]
         public int Id { get; set; }
+        public string TaskCode { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         [ForeignKey("User")]
@@ -21,11 +22,35 @@ namespace TaskManagement_April_.Model
         [ForeignKey("Priority")]
         public int priority {  get; set; }
         [ForeignKey("SubTask")]
-        public int subTaskId {  get; set; }
+        public int? subTaskId {  get; set; }
         
         [ForeignKey("Project")]
-        public int ProjectId {  get; set; }
-        
+        public int? ProjectId {  get; set; }
+        public virtual IList<int>? Attachments { get; set; }
+    }
+
+    public class TaskL
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        [ForeignKey("User")]
+        public int AssignTo { get; set; }
+
+        [ForeignKey("User")]
+        public int AssignBy { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        [ForeignKey("Status")]
+        public int Status { get; set; }
+        [ForeignKey("Priority")]
+        public int priority { get; set; }
+        [ForeignKey("SubTask")]
+        public int? subTaskId { get; set; }
+
+        [ForeignKey("Project")]
+        public int? ProjectId { get; set; }
+        public virtual IList<int>? Attachments { get; set; }
     }
 
     public class SearchTasks
@@ -61,4 +86,20 @@ namespace TaskManagement_April_.Model
         public DateTime? duedate { get; set; }
         public int? priority { get; set; }
     }
+
+    public class TaskView
+    {
+        public string AssignToName { get; set; }
+        public string AssignByName { get; set; }
+        public string AssignToEmail { get; set; }
+        public string AssignByEmail { get; set; }
+        public string PriorityName { get; set; }
+        public string ProjectName { get; set; }
+        public string SubTaskName { get; set; }
+    }
+
+    //public class TaskValidate
+    //{
+    //    public int valid {  get; set; }
+    //    public string errormsg { get; set; }
 }

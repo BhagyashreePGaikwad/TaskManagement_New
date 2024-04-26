@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using TaskManagement_April_.Context;
 using TaskManagement_April_.Model;
 using TaskManagement_April_.Service;
 using TaskManagement_April_.Service.Implementation;
@@ -9,23 +10,25 @@ namespace TaskManagement_April_.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+   // [Authorize]
     public class TaskController : Controller
     {
         #region Variables
         private readonly ITaskService _taskService;
         private Response? obResponse;
+        private TaskManagementContext _dbcontext;
         #endregion
         #region Constructor
-        public TaskController(ITaskService taskService)
+        public TaskController(ITaskService taskService,TaskManagementContext dbcontext)
         {
             _taskService = taskService;
+            _dbcontext = dbcontext;
         }
         #endregion
 
         #region Methods
         [HttpPost("SaveTask")]
-        public async Task<IActionResult> SaveTask([FromBody] Tasks task)
+        public async Task<IActionResult> SaveTask([FromBody] TaskL task)
         {
             try
             {
@@ -52,74 +55,89 @@ namespace TaskManagement_April_.Controllers
 
                         return Ok(obResponse);
                     }
-                    var request = await _taskService.SaveTask(task);
-                    if (request)
-                    {
+                    var (request,msg,status,generatedcode) = await _taskService.SaveTask(task);
+                    //if (request)
+                    //{
                        
                             obResponse = new Response
                             {
-                                Message = "Task added successfully.",
-                                IsSuccess = true
+                                Message = msg,
+                                IsSuccess = request
                             };
-                      
-                        return Ok(obResponse);
-                    }
-                    else
-                    {
-                        obResponse = new Response
-                        {
-                            Message = "Task cannot be added",
-                            IsSuccess = false
-                        };
 
-                        return Ok(obResponse);
-                    }
+                    return StatusCode(status,new { response = obResponse, code = generatedcode});
+                    //}
+                    //else
+                    //{
+                    //    obResponse = new Response
+                    //    {
+                    //        Message = "Task cannot be added",
+                    //        IsSuccess = false
+                    //    };
+
+                    //    return Ok(obResponse);
+                    //}
                 }
                 return BadRequest("Some properties are not valid.");
 
             }
             catch (Exception ex)
             {
-
-                return BadRequest("Some properties are not valid.");
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
         [HttpPost("UpdateTask/{id}")]
-        public async Task<IActionResult> UpdateTask([FromBody] Tasks task,int id)
+        public async Task<IActionResult> UpdateTask([FromBody] TaskL task,int id)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    var request = await _taskService.UpdateTask(task,id);
-                    if (request)
+                    if (task.Name.IsNullOrEmpty())
                     {
-                        
                         obResponse = new Response
                         {
-                            Message = "Task update successfully.",
+                            Message = "Task cannot be empty",
                             IsSuccess = true
                         };
+
                         return Ok(obResponse);
                     }
-                    else
+                    if (task.Description.IsNullOrEmpty())
                     {
                         obResponse = new Response
                         {
-                            Message = "Task cannot be updated",
-                            IsSuccess = false
+                            Message = "Task Description cannot be empty",
+                            IsSuccess = true
                         };
+
                         return Ok(obResponse);
                     }
+                    var (request, msg, status) = await _taskService.UpdateTask(task,id);
+                    obResponse = new Response
+                    {
+                        Message = msg,
+                        IsSuccess = request
+                    };
+                    return StatusCode(status, obResponse);
                 }
                 return BadRequest("Some properties are not valid.");
 
             }
             catch (Exception ex)
             {
-
-                return BadRequest("Some properties are not valid.");
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
         [HttpGet("GetTaskByProject")]
@@ -133,9 +151,17 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
+
+        
+
 
 
         [HttpGet("GetTaskBySubTask")]
@@ -149,7 +175,13 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -165,7 +197,12 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -180,7 +217,12 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -195,7 +237,12 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
 
@@ -210,7 +257,13 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
         [HttpPost("SearchTask")]
@@ -224,9 +277,103 @@ namespace TaskManagement_April_.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
             }
         }
+
+        [HttpPost("UpdateTaskStatus")]
+        public async Task<IActionResult> UpdateTaskStatus(int id)
+        {
+            try
+            {
+                var (result, msg) = await _taskService.UpdateTaskStatus(id);
+                obResponse = new Response
+                {
+                    Message = msg,
+                    IsSuccess = result
+                };
+                return Ok(obResponse);
+
+            }
+            catch (Exception ex)
+            {
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
+            }
+        }
+
+        [HttpPost("UpdateTaskPriority")]
+        public async Task<IActionResult> UpdateTaskPriority(int id)
+        {
+            try
+            {
+                var (result, msg) = await _taskService.UpdateTaskPriority(id);
+                obResponse = new Response
+                {
+                    Message = msg,
+                    IsSuccess = result
+                };
+                return Ok(obResponse);
+
+            }
+            catch (Exception ex)
+            {
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
+            }
+        }
+
+        [HttpDelete("DeleteTask")]
+        public async Task<IActionResult> DeleteTask(int id)
+        {
+            try
+            { 
+                var task= await _taskService.DelTask(id);
+                if (task)
+                {
+                    obResponse = new Response
+                    {
+                        Message ="Task Deleted",
+                        IsSuccess = true
+                    };
+                    return Ok(obResponse);
+                }
+                else
+                {
+                    obResponse = new Response
+                    {
+                        Message = "Not found",
+                        IsSuccess = false
+                    };
+                    return BadRequest(obResponse);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                obResponse = new Response
+                {
+                    Message = ex.Message,
+                    IsSuccess = false
+                };
+                return BadRequest(obResponse);
+            }
+        }
+
+
         #endregion
     }
 }

@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Threading.Tasks;
 using TaskManagement_April_.Context;
 using TaskManagement_April_.Model;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TaskManagement_April_.Service.Implementation
 {
@@ -9,31 +11,71 @@ namespace TaskManagement_April_.Service.Implementation
     {
         #region Variable
         private TaskManagementContext _dbcontext;
+        private ITaskService _taskService;
         #endregion
 
         #region Constructor
-        public SubTaskService(TaskManagementContext dbcontext)
+        public SubTaskService(TaskManagementContext dbcontext,ITaskService taskService)
         {
             _dbcontext = dbcontext;
+            _taskService = taskService;
         }
         #endregion
-        public Task<bool> DelSubTask(int id)
+        public async Task<bool> DelSubTask(int id)
         {
             try
             {
                 var result = _dbcontext.SubTask.FirstOrDefault(x => x.Id == id);
                 if (result != null)
                 {
-                    _dbcontext.SubTask.Remove(result);
-                    _dbcontext.SaveChanges();
-                    return Task.FromResult(true);
+                    var delTask= await _taskService.DelTaskwithSubTaskId(id);
+                    if (delTask)
+                    {
+                        _dbcontext.SubTask.Remove(result);
+                        _dbcontext.SaveChanges();
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                  
                 }
-                else { return Task.FromResult(false); }
+                else { return false; }
 
             }
             catch (Exception ex)
             {
-                return Task.FromResult(false);
+                return false;
+            }
+        }
+
+        public async Task<bool> DelSubTaskwithProject(int projid)
+        {
+            try
+            {
+                var result = _dbcontext.SubTask.Where(x => x.Id == projid).ToList();
+                var delTask = await _taskService.DelTaskwithProjId(projid);
+                if (delTask)
+                {
+                    if (result != null && result.Any())
+                    {
+
+                        _dbcontext.SubTask.RemoveRange(result);
+                        _dbcontext.SaveChanges();
+                        return true;
+                    }
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
         }
 
@@ -140,20 +182,25 @@ namespace TaskManagement_April_.Service.Implementation
             }
         }
 
-        public Task<bool> SaveSubTask(SubTask model)
+        public Task<(bool,string,int)> SaveSubTask(SubTask model)
         {
             try
             {
+                if (!_dbcontext.Project.Any(u => u.Id == model.projectId))
+                {
+                    return Task.FromResult((false, "Invalid ProjectId", 400));
+                }
+            
                 _dbcontext.SubTask.Add(model);
                 _dbcontext.SaveChanges();
-                return Task.FromResult(true);
+                return Task.FromResult((true, "Subtask Added successfully", 200));
             }
             catch( Exception ex)
             {
-                return Task.FromResult(false);
+                 return Task.FromResult((false, ex.Message, 400));
             }
         }
-        public Task<bool> UpdateSubTask(SubTask model,int id)
+        public Task<(bool,string,int)> UpdateSubTask(SubTask model,int id)
         {
             try
             {
@@ -161,23 +208,28 @@ namespace TaskManagement_April_.Service.Implementation
                 var task = _dbcontext.SubTask.FirstOrDefault(t => t.Id == id);
                 if (task != null)
                 {
+                    if (!_dbcontext.Project.Any(u => u.Id == model.projectId))
+                    {
+                        return Task.FromResult((false, "Invalid ProjectId", 400));
+                    }
+
                     task.SubTaskName = model.SubTaskName;
                     task.projectId = model.projectId;
                     _dbcontext.SaveChanges();
-                    return Task.FromResult(true);
+                    return Task.FromResult((true,"Subtask updated successsfully",200));
                 }
                 else
                 {
-                    return Task.FromResult(false);
+                    return Task.FromResult((false, "subtask does not exist", 404));
 
                 }
 
-                return Task.FromResult(false);
+                return Task.FromResult((false, "subtask cannot be updated", 400));
 
             }
             catch (Exception ex)
             {
-                return Task.FromResult(false);
+                return Task.FromResult((false, ex.Message, 400));
             }
         }
     }
